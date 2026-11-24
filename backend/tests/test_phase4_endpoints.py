@@ -110,15 +110,46 @@ class Phase4EndpointTests(unittest.TestCase):
             self.client.post("/api/input/validate", json=invalid).status_code,
             422,
         )
-        unsupported = {**self.preferences, "cpu_family": "AMD Ryzen 7"}
+        supported_amd = {**self.preferences, "cpu_family": "AMD Ryzen 7"}
         self.assertEqual(
-            self.client.post("/api/recommendations", json=unsupported).status_code,
-            422,
+            self.client.post("/api/recommendations", json=supported_amd).status_code,
+            200,
         )
         self.assertEqual(
             self.client.get("/api/catalog?sort=unknown").status_code,
             422,
         )
+
+    def test_budget_idr_boolean_positive_zero_and_negative(self):
+        for boolean_budget in (True, False):
+            response = self.client.post(
+                "/api/input/validate",
+                json={**self.preferences, "budget_idr": boolean_budget},
+            )
+            with self.subTest(budget_idr=boolean_budget):
+                self.assertEqual(response.status_code, 422)
+                self.assertIn("detail", response.json())
+
+        positive = self.client.post(
+            "/api/input/validate",
+            json={**self.preferences, "budget_idr": 30_000_000},
+        )
+        self.assertEqual(positive.status_code, 200)
+        self.assertEqual(positive.json()["budget_eur"], 1500)
+
+        zero = self.client.post(
+            "/api/input/validate",
+            json={**self.preferences, "budget_idr": 0},
+        )
+        self.assertEqual(zero.status_code, 200)
+        self.assertEqual(zero.json()["budget_eur"], 0)
+
+        negative = self.client.post(
+            "/api/input/validate",
+            json={**self.preferences, "budget_idr": -1},
+        )
+        self.assertEqual(negative.status_code, 422)
+        self.assertIn("detail", negative.json())
 
     def test_upload_rejects_invalid_numeric_values(self):
         header = (

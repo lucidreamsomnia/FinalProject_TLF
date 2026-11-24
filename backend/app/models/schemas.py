@@ -12,6 +12,13 @@ class PreferenceRequest(BaseModel):
     cpu_family: str
     cpu_base_ghz: float = Field(ge=0)
 
+    @field_validator("budget_idr", mode="before")
+    @classmethod
+    def reject_boolean_budget(cls, value: object) -> object:
+        if isinstance(value, bool):
+            raise ValueError("budget_idr must be a finite non-negative number.")
+        return value
+
     @field_validator(
         "budget_idr",
         "ram_gb",

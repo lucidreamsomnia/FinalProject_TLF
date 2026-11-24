@@ -128,6 +128,58 @@ def _validate_top_n(top_n: object, available: int) -> int:
     return int(top_n)
 
 
+def _validate_knn_output(
+    distances: object,
+    indices: object,
+    expected_count: int,
+    available: int,
+) -> tuple[np.ndarray, list[int]]:
+    try:
+        distance_array = np.asarray(distances, dtype=float)
+        index_array = np.asarray(indices)
+    except (TypeError, ValueError) as exc:
+        raise RuntimeError("KNN returned invalid distances or indices.") from exc
+
+    expected_shape = (1, expected_count)
+    if distance_array.shape != expected_shape:
+        raise RuntimeError(
+            "KNN distance count does not match the requested number "
+            f"of neighbors: got shape {distance_array.shape}, "
+            f"expected {expected_shape}."
+        )
+    if index_array.shape != expected_shape:
+        raise RuntimeError(
+            "KNN index count does not match the returned distance count "
+            f"or requested neighbors: got shape {index_array.shape}, "
+            f"expected {expected_shape}."
+        )
+
+    distance_values = distance_array[0]
+    if not np.isfinite(distance_values).all() or (distance_values < 0).any():
+        raise RuntimeError("KNN returned invalid distances.")
+
+    valid_indices: list[int] = []
+    for value in index_array[0]:
+        if isinstance(value, bool) or not isinstance(value, (Integral, np.integer)):
+            raise RuntimeError("KNN returned a non-integer index.")
+        index = int(value)
+        if index < 0:
+            raise RuntimeError("KNN returned a negative index.")
+        if index >= available:
+            raise RuntimeError(
+                f"KNN returned index {index}, outside dataset bounds "
+                f"[0, {available})."
+            )
+        valid_indices.append(index)
+
+    if len(valid_indices) != distance_values.shape[0]:
+        raise RuntimeError(
+            "KNN returned different counts of indices and distances."
+        )
+
+    return distance_values, valid_indices
+
+
 def recommend_laptops(
     preferences: LaptopPreferences | Mapping[str, object],
     model_bundle: ModelBundle,
@@ -166,19 +218,16 @@ def recommend_laptops(
         query_frame,
         n_neighbors=count,
     )
-    distances = np.asarray(distances[0], dtype=float)
-    indices = np.asarray(indices[0], dtype=int)
-    if (
-        distances.shape != (count,)
-        or indices.shape != (count,)
-        or not np.isfinite(distances).all()
-        or (distances < 0).any()
-    ):
-        raise RuntimeError("KNN returned invalid distances or indices.")
+    distances, valid_indices = _validate_knn_output(
+        distances,
+        indices,
+        expected_count=count,
+        available=available,
+    )
 
     results: list[Recommendation] = []
     for rank, (distance, row_index) in enumerate(
-        zip(distances, indices, strict=True),
+        zip(distances, valid_indices, strict=True),
         start=1,
     ):
         row = model_bundle.original_dataset.iloc[int(row_index)]

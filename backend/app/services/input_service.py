@@ -21,6 +21,8 @@ def preference_to_numeric(
     values: dict[str, Any],
     bundle: ModelBundle,
 ) -> tuple[float, dict[str, Any]]:
+    if isinstance(values["budget_idr"], bool):
+        raise ValueError("budget_idr must be finite and non-negative.")
     budget_idr = float(values["budget_idr"])
     if not np.isfinite(budget_idr) or budget_idr < 0:
         raise ValueError("budget_idr must be finite and non-negative.")

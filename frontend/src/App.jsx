@@ -1,16 +1,9 @@
 import { Route, Routes } from 'react-router-dom'
 import MainLayout from './components/layout/MainLayout'
-
-const pages = [
-  { path: '/', label: 'Dashboard', title: 'Dashboard' },
-  { path: '/input-data', label: 'Input Data', title: 'Input Data' },
-  { path: '/cari-laptop', label: 'Cari Laptop', title: 'Cari Laptop' },
-  { path: '/hasil-rekomendasi', label: 'Hasil Rekomendasi', title: 'Hasil Rekomendasi' },
-  { path: '/katalog', label: 'Katalog Laptop', title: 'Katalog Laptop' },
-  { path: '/processing', label: 'Processing & Algorithm', title: 'Processing & Algorithm' },
-  { path: '/evaluasi', label: 'Evaluasi Model', title: 'Evaluasi Model' },
-  { path: '/tentang', label: 'Tentang Sistem', title: 'Tentang Sistem' },
-]
+import CariLaptop from './pages/CariLaptop'
+import Dashboard from './pages/Dashboard'
+import InputData from './pages/InputData'
+import HasilRekomendasi from './pages/HasilRekomendasi'
 
 function PlaceholderPage({ title }) {
   return (
@@ -28,13 +21,14 @@ function App() {
   return (
     <Routes>
       <Route element={<MainLayout />}>
-        {pages.map((page) => (
-          <Route
-            key={page.path}
-            path={page.path}
-            element={<PlaceholderPage title={page.title} />}
-          />
-        ))}
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/input-data" element={<InputData />} />
+        <Route path="/cari-laptop" element={<CariLaptop />} />
+        <Route path="/hasil-rekomendasi" element={<HasilRekomendasi />} />
+        <Route path="/katalog" element={<PlaceholderPage title="Katalog Laptop" />} />
+        <Route path="/processing" element={<PlaceholderPage title="Processing & Algorithm" />} />
+        <Route path="/evaluasi" element={<PlaceholderPage title="Evaluasi Model" />} />
+        <Route path="/tentang" element={<PlaceholderPage title="Tentang Sistem" />} />
       </Route>
     </Routes>
   )

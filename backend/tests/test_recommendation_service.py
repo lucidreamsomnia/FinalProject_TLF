@@ -1,13 +1,14 @@
 import unittest
 from dataclasses import replace
+from unittest.mock import Mock
 
 import numpy as np
 
-from backend.app.services.model_loader import get_model_bundle
 from backend.app.services.recommendation_service import (
     LaptopPreferences,
     recommend_laptops,
 )
+from backend.app.services.model_loader import get_model_bundle
 
 
 class RecommendationServiceTests(unittest.TestCase):
@@ -68,13 +69,73 @@ class RecommendationServiceTests(unittest.TestCase):
             [result.distance for result in second],
         )
 
+    def test_normal_knn_indices(self):
+        mock_model = Mock()
+        mock_model.kneighbors.return_value = (
+            np.array([[0.1, 0.2, 0.3, 0.4, 0.5]], dtype=float),
+            np.array([[0, 1, 2, 3, 4]], dtype=int),
+        )
+        bundle = replace(self.bundle, knn_model=mock_model)
+
+        results = recommend_laptops(self.preferences, bundle)
+
+        self.assertEqual([result.row_index for result in results], [0, 1, 2, 3, 4])
+        for result in results:
+            row = bundle.original_dataset.iloc[result.row_index]
+            fcm_row = bundle.fcm_results.iloc[result.row_index]
+            self.assertEqual(result.product, row["Product"])
+            self.assertEqual(result.fcm_cluster, int(fcm_row["Cluster"]))
+
+    def test_negative_knn_index(self):
+        mock_model = Mock()
+        mock_model.kneighbors.return_value = (
+            np.array([[0.1, 0.2, 0.3, 0.4, 0.5]], dtype=float),
+            np.array([[0, 1, -1, 3, 4]], dtype=int),
+        )
+        bundle = replace(self.bundle, knn_model=mock_model)
+
+        with self.assertRaisesRegex(RuntimeError, "negative index"):
+            recommend_laptops(self.preferences, bundle)
+
+    def test_knn_index_outside_dataset_bounds(self):
+        mock_model = Mock()
+        mock_model.kneighbors.return_value = (
+            np.array([[0.1, 0.2, 0.3, 0.4, 0.5]], dtype=float),
+            np.array([[0, 1, 1303, 3, 4]], dtype=int),
+        )
+        bundle = replace(self.bundle, knn_model=mock_model)
+
+        with self.assertRaisesRegex(RuntimeError, "outside dataset bounds"):
+            recommend_laptops(self.preferences, bundle)
+
+    def test_non_integer_knn_index(self):
+        mock_model = Mock()
+        mock_model.kneighbors.return_value = (
+            np.array([[0.1, 0.2, 0.3, 0.4, 0.5]], dtype=float),
+            np.array([[0.0, 1.0, 2.0, 3.0, 4.0]], dtype=float),
+        )
+        bundle = replace(self.bundle, knn_model=mock_model)
+
+        with self.assertRaisesRegex(RuntimeError, "non-integer index"):
+            recommend_laptops(self.preferences, bundle)
+
+    def test_mismatched_knn_index_and_distance_counts(self):
+        mock_model = Mock()
+        mock_model.kneighbors.return_value = (
+            np.array([[0.1, 0.2, 0.3, 0.4, 0.5]], dtype=float),
+            np.array([[0, 1, 2, 3]], dtype=int),
+        )
+        bundle = replace(self.bundle, knn_model=mock_model)
+
+        with self.assertRaisesRegex(RuntimeError, "index count"):
+            recommend_laptops(self.preferences, bundle)
+
     def test_invalid_inputs(self):
         invalid_cases = [
             replace(self.preferences, max_budget_eur=-1),
             replace(self.preferences, ram_gb=-1),
             replace(self.preferences, weight_kg=float("nan")),
             replace(self.preferences, cpu_base_ghz=float("inf")),
-            replace(self.preferences, cpu_family="AMD Ryzen 7"),
         ]
         for invalid in invalid_cases:
             with self.subTest(invalid=invalid):

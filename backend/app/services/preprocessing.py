@@ -54,14 +54,6 @@ def identify_cpu_family(cpu: object) -> str:
         return "Intel Pentium"
     if "atom" in value:
         return "Intel Atom"
-    if "ryzen 9" in value:
-        return "AMD Ryzen 9"
-    if "ryzen 7" in value:
-        return "AMD Ryzen 7"
-    if "ryzen 5" in value:
-        return "AMD Ryzen 5"
-    if "ryzen 3" in value:
-        return "AMD Ryzen 3"
     if "amd" in value:
         return "AMD Other"
     return "Other"
