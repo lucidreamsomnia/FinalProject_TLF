@@ -1,0 +1,60 @@
+{
+  "versions": {
+    "python": "3.13.14",
+    "python_full": "3.13.14 (tags/v3.13.14:fd17997, Jun 10 2026, 13:03:48) [MSC v.1944 64 bit (AMD64)]",
+    "numpy": "2.2.6",
+    "pandas": "2.3.3",
+    "scikit_learn": "1.9.1",
+    "scikit_fuzzy": "0.5.0"
+  },
+  "dataset": {
+    "filename": "laptop_price.csv",
+    "row_count": 1303
+  },
+  "seven_feature_names": [
+    "Price_euros",
+    "Ram_GB",
+    "Weight_kg",
+    "SSD_GB",
+    "HDD_GB",
+    "CPU_Family_Score",
+    "CPU_Base_GHz"
+  ],
+  "log1p_columns": [
+    "Price_euros",
+    "Ram_GB",
+    "SSD_GB",
+    "HDD_GB"
+  ],
+  "knn_feature_names": [
+    "Price_euros",
+    "Ram_GB",
+    "Weight_kg",
+    "SSD_GB",
+    "HDD_GB",
+    "CPU_Family_Score",
+    "CPU_Base_GHz",
+    "Membership_Cluster_1",
+    "Membership_Cluster_2",
+    "Membership_Cluster_3",
+    "Membership_Cluster_4"
+  ],
+  "fcm_parameters": {
+    "c": 4,
+    "m": 2.0,
+    "error": 0.005,
+    "maxiter": 1000,
+    "seed": 42
+  },
+  "knn_parameters": {
+    "n_neighbors": 5,
+    "metric": "euclidean",
+    "algorithm": "brute"
+  },
+  "artifacts": {
+    "scaler": "scaler.joblib",
+    "knn_model": "knn_model.joblib",
+    "fcm_centers": "dataset/fcm_centers.npy",
+    "manifest": "model_manifest.json"
+  }
+}

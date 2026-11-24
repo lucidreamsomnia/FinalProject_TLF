@@ -1,0 +1,365 @@
+:root {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #172858;
+  background: #f7f9fc;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --color-primary: #2f80ed;
+  --color-primary-dark: #172858;
+  --color-text: #172858;
+  --color-muted: #70809e;
+  --color-subtle: #9aa8c0;
+  --color-surface: #ffffff;
+  --color-background: #f7f9fc;
+  --color-border: #e5eaf2;
+  --sidebar-width: 220px;
+  --topbar-height: 64px;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.layout-shell {
+  min-height: 100vh;
+}
+
+.sidebar {
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: var(--sidebar-width);
+  z-index: 20;
+}
+
+.sidebar-brand {
+  align-items: center;
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  gap: 0.6rem;
+  height: var(--topbar-height);
+  padding: 0 1.25rem;
+}
+
+.brand-mark {
+  align-items: center;
+  background: var(--color-primary-dark);
+  border-radius: 0.45rem;
+  color: #fff;
+  display: flex;
+  height: 29px;
+  justify-content: center;
+  width: 29px;
+}
+
+.brand-name,
+.brand-tagline {
+  display: block;
+}
+
+.brand-name {
+  color: var(--color-primary-dark);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.brand-tagline {
+  color: var(--color-subtle);
+  font-size: 0.42rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  margin-top: 0.12rem;
+}
+
+.sidebar-nav {
+  padding: 1.35rem 0.7rem;
+}
+
+.nav-heading {
+  color: var(--color-subtle);
+  font-size: 0.48rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  margin: 0 0 0.65rem 0.55rem;
+  text-transform: uppercase;
+}
+
+.navigation-item {
+  align-items: center;
+  border-radius: 0.55rem;
+  color: #596b8c;
+  display: flex;
+  font-size: 0.72rem;
+  gap: 0.68rem;
+  margin: 0.12rem 0;
+  min-height: 36px;
+  padding: 0 0.7rem;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.navigation-item:hover,
+.navigation-item:focus-visible {
+  background: #f0f5ff;
+  color: var(--color-primary);
+}
+
+.navigation-item.is-active {
+  background: #eaf3ff;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.sidebar-footer {
+  border-top: 1px solid #f0f2f6;
+  color: var(--color-subtle);
+  display: flex;
+  flex-direction: column;
+  font-size: 0.52rem;
+  gap: 0.3rem;
+  line-height: 1.45;
+  margin: auto 0.7rem 0;
+  padding: 0.95rem 0.1rem 1.2rem;
+}
+
+.sidebar-footer strong {
+  color: #71819e;
+  font-size: 0.52rem;
+}
+
+.layout-main {
+  margin-left: var(--sidebar-width);
+  min-height: 100vh;
+}
+
+.topbar {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.96);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  height: var(--topbar-height);
+  justify-content: space-between;
+  padding: 0 1.6rem;
+}
+
+.topbar-page {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+}
+
+.topbar-page > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.topbar-eyebrow {
+  color: var(--color-subtle);
+  font-size: 0.48rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.topbar-page strong {
+  color: var(--color-primary-dark);
+  font-size: 0.7rem;
+}
+
+.menu-button,
+.icon-button {
+  align-items: center;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 0.55rem;
+  color: var(--color-primary-dark);
+  display: inline-flex;
+  justify-content: center;
+}
+
+.menu-button {
+  display: none;
+  height: 34px;
+  width: 34px;
+}
+
+.icon-button {
+  height: 34px;
+  position: relative;
+  width: 34px;
+}
+
+.icon-button:hover,
+.menu-button:hover {
+  background: #f4f7fc;
+}
+
+.notification-dot {
+  background: var(--color-primary);
+  border: 2px solid #fff;
+  border-radius: 999px;
+  height: 7px;
+  position: absolute;
+  right: 7px;
+  top: 6px;
+  width: 7px;
+}
+
+.topbar-actions,
+.profile {
+  align-items: center;
+  display: flex;
+}
+
+.topbar-actions {
+  gap: 0.75rem;
+}
+
+.profile {
+  gap: 0.5rem;
+}
+
+.profile-avatar {
+  align-items: center;
+  background: var(--color-primary-dark);
+  border-radius: 999px;
+  color: #fff;
+  display: flex;
+  font-size: 0.52rem;
+  font-weight: 700;
+  height: 26px;
+  justify-content: center;
+  width: 26px;
+}
+
+.profile-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.08rem;
+}
+
+.profile-copy strong {
+  color: var(--color-primary-dark);
+  font-size: 0.58rem;
+}
+
+.profile-copy small {
+  color: var(--color-subtle);
+  font-size: 0.48rem;
+}
+
+.page-shell {
+  margin: 0 auto;
+  max-width: 1220px;
+  padding: 2.2rem 1.6rem 3rem;
+}
+
+.eyebrow {
+  color: var(--color-primary);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  margin: 0 0 0.55rem;
+  text-transform: uppercase;
+}
+
+h1 {
+  color: var(--color-primary-dark);
+  font-size: clamp(1.65rem, 3vw, 2.35rem);
+  letter-spacing: -0.045em;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.page-placeholder {
+  color: var(--color-muted);
+  font-size: 0.82rem;
+  margin-top: 0.8rem;
+}
+
+.sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 800px) {
+  .sidebar {
+    box-shadow: 0 18px 45px rgba(23, 40, 88, 0.16);
+    transform: translateX(-105%);
+    transition: transform 180ms ease;
+  }
+
+  .sidebar.is-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-backdrop {
+    background: rgba(23, 40, 88, 0.25);
+    border: 0;
+    inset: 0;
+    position: fixed;
+    z-index: 15;
+  }
+
+  .sidebar-backdrop.is-visible {
+    display: block;
+  }
+
+  .layout-main {
+    margin-left: 0;
+  }
+
+  .topbar {
+    padding: 0 1rem;
+  }
+
+  .menu-button {
+    display: inline-flex;
+  }
+
+  .page-shell {
+    padding: 1.8rem 1rem 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-copy {
+    display: none;
+  }
+
+  .topbar-actions {
+    gap: 0.5rem;
+  }
+}
