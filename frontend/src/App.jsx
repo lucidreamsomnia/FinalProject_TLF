@@ -4,18 +4,10 @@ import CariLaptop from './pages/CariLaptop'
 import Dashboard from './pages/Dashboard'
 import InputData from './pages/InputData'
 import HasilRekomendasi from './pages/HasilRekomendasi'
-
-function PlaceholderPage({ title }) {
-  return (
-    <main className="page-shell">
-      <p className="eyebrow">LAPTOPFIND</p>
-      <h1>{title}</h1>
-      <p className="page-placeholder">
-        Halaman ini disiapkan untuk implementasi Phase 5.2.
-      </p>
-    </main>
-  )
-}
+import KatalogLaptop from './pages/KatalogLaptop'
+import ProcessingAlgorithm from './pages/ProcessingAlgorithm'
+import EvaluasiModel from './pages/EvaluasiModel'
+import TentangSistem from './pages/TentangSistem'
 
 function App() {
   return (
@@ -25,10 +17,10 @@ function App() {
         <Route path="/input-data" element={<InputData />} />
         <Route path="/cari-laptop" element={<CariLaptop />} />
         <Route path="/hasil-rekomendasi" element={<HasilRekomendasi />} />
-        <Route path="/katalog" element={<PlaceholderPage title="Katalog Laptop" />} />
-        <Route path="/processing" element={<PlaceholderPage title="Processing & Algorithm" />} />
-        <Route path="/evaluasi" element={<PlaceholderPage title="Evaluasi Model" />} />
-        <Route path="/tentang" element={<PlaceholderPage title="Tentang Sistem" />} />
+        <Route path="/katalog" element={<KatalogLaptop />} />
+        <Route path="/processing" element={<ProcessingAlgorithm />} />
+        <Route path="/evaluasi" element={<EvaluasiModel />} />
+        <Route path="/tentang" element={<TentangSistem />} />
       </Route>
     </Routes>
   )

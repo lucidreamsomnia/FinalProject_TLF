@@ -27,6 +27,40 @@ export async function fetchRecommendations(preferences) {
   return response.data
 }
 
+export async function fetchCatalog(parameters = {}) {
+  const query = new URLSearchParams()
+
+  Object.entries(parameters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      query.set(key, String(value))
+    }
+  })
+
+  const queryString = query.toString()
+  const response = await api.get(queryString ? `/catalog?${queryString}` : '/catalog')
+  return response.data
+}
+
+export async function fetchProcessing() {
+  const response = await api.get('/processing')
+  return response.data
+}
+
+export async function runProcessingDemonstration() {
+  const response = await api.post('/processing/run')
+  return response.data
+}
+
+export async function fetchEvaluation() {
+  const response = await api.get('/evaluation')
+  return response.data
+}
+
+export async function fetchSystemInfo() {
+  const response = await api.get('/system-info')
+  return response.data
+}
+
 export function getApiError(error, fallback = 'Terjadi kesalahan saat menghubungi server.') {
   const detail = error?.response?.data?.detail
   if (typeof detail === 'string') return detail

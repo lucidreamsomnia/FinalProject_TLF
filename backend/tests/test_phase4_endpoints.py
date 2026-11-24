@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
@@ -185,6 +186,114 @@ class Phase4EndpointTests(unittest.TestCase):
         self.assertTrue(
             any("Missing required column" in error for error in missing_column.json()["errors"])
         )
+
+    def test_upload_accepts_utf8_and_cp1252_csvs(self):
+        dataset_path = (
+            Path(__file__).resolve().parents[2] / "dataset" / "laptop_price.csv"
+        )
+        original_dataset = self.client.post(
+            "/api/input/upload",
+            files={
+                "file": (
+                    dataset_path.name,
+                    dataset_path.read_bytes(),
+                    "text/csv",
+                )
+            },
+        )
+        self.assertEqual(original_dataset.status_code, 200)
+        self.assertTrue(original_dataset.json()["valid"])
+        self.assertEqual(original_dataset.json()["row_count"], 1303)
+        self.assertEqual(len(original_dataset.json()["columns"]), 13)
+
+        utf8_csv = (
+            "Price_euros,Ram_GB,Weight_kg,SSD_GB,HDD_GB,"
+            "CPU_Family_Score,CPU_Base_GHz,Product\n"
+            "1000,16,2,512,0,5,2.4,Café Laptop\n"
+        ).encode("utf-8")
+        utf8_upload = self.client.post(
+            "/api/input/upload",
+            files={"file": ("utf8.csv", utf8_csv, "text/csv")},
+        )
+        self.assertEqual(utf8_upload.status_code, 200)
+        self.assertTrue(utf8_upload.json()["valid"])
+        self.assertEqual(utf8_upload.json()["preview"][0]["Product"], "Café Laptop")
+
+    def test_upload_reports_unsupported_encoding(self):
+        content = (
+            b"Price_euros,Ram_GB,Weight_kg,SSD_GB,HDD_GB,"
+            b"CPU_Family_Score,CPU_Base_GHz,Product\n"
+            b"1000,16,2,512,0,5,2.4,\x81\n"
+        )
+        response = self.client.post(
+            "/api/input/upload",
+            files={"file": ("unsupported.csv", content, "text/csv")},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.json()["valid"])
+        self.assertIn("UTF-8 or Windows-1252", response.json()["errors"][0])
+
+    def test_upload_accepts_positive_ram_and_weight_formats(self):
+        header = (
+            "laptop_ID,Company,Product,TypeName,Inches,ScreenResolution,"
+            "Cpu,Ram,Memory,Gpu,OpSys,Weight,Price_euros\n"
+        )
+        rows = [
+            "1,Brand,Model,Notebook,15.6,1920x1080,Intel,8GB,256GB SSD,"
+            "Nvidia,Windows,1.37kg,1000",
+            "2,Brand,Model,Notebook,15.6,1920x1080,Intel,16GB,512GB SSD,"
+            "Nvidia,Windows,2.1kg,1200",
+            "3,Brand,Model,Notebook,15.6,1920x1080,Intel,32GB,1TB SSD,"
+            "Nvidia,Windows,2kg,1400",
+        ]
+        response = self.client.post(
+            "/api/input/upload",
+            files={
+                "file": (
+                    "valid_specs.csv",
+                    (header + "\n".join(rows) + "\n").encode("utf-8"),
+                    "text/csv",
+                )
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.json()["valid"], response.json()["errors"])
+        self.assertEqual(response.json()["row_count"], 3)
+
+    def test_upload_rejects_invalid_ram_and_weight_formats(self):
+        header = (
+            "laptop_ID,Company,Product,TypeName,Inches,ScreenResolution,"
+            "Cpu,Ram,Memory,Gpu,OpSys,Weight,Price_euros\n"
+        )
+        cases = [
+            ("0GB", "1.37kg", "Ram"),
+            ("-8GB", "1.37kg", "Ram"),
+            ("invalid", "1.37kg", "Ram"),
+            ("8GB", "0kg", "Weight"),
+            ("8GB", "-2.1kg", "Weight"),
+            ("8GB", "invalid", "Weight"),
+        ]
+        for ram, weight, invalid_column in cases:
+            row = (
+                f"1,Brand,Model,Notebook,15.6,1920x1080,Intel,{ram},"
+                f"256GB SSD,Nvidia,Windows,{weight},1000\n"
+            )
+            with self.subTest(ram=ram, weight=weight):
+                response = self.client.post(
+                    "/api/input/upload",
+                    files={
+                        "file": (
+                            "invalid_specs.csv",
+                            (header + row).encode("utf-8"),
+                            "text/csv",
+                        )
+                    },
+                )
+                self.assertEqual(response.status_code, 200)
+                self.assertFalse(response.json()["valid"])
+                self.assertTrue(
+                    any(invalid_column in error for error in response.json()["errors"])
+                )
 
     def test_evaluation_does_not_run_fcm_training(self):
         with patch(
