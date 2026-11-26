@@ -583,6 +583,71 @@ h1 {
   color: #516583;
 }
 
+.dashboard-cluster-profiles {
+  margin-top: 1rem;
+}
+
+.dashboard-cluster-profile-grid {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 0.75rem;
+}
+
+.cluster-profile-metric {
+  background: #fafbfd;
+  border: 1px solid #edf0f5;
+  border-radius: 0.55rem;
+  padding: 0.75rem;
+}
+
+.cluster-profile-metric h3 {
+  color: var(--color-primary-dark);
+  font-size: 0.65rem;
+  margin: 0;
+}
+
+.cluster-profile-rows {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+.cluster-profile-label {
+  align-items: baseline;
+  display: flex;
+  font-size: 0.56rem;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.cluster-profile-label span {
+  color: #516583;
+}
+
+.cluster-profile-label strong {
+  color: var(--color-primary-dark);
+  font-size: 0.56rem;
+  text-align: right;
+}
+
+.cluster-profile-track,
+.membership-degree-track {
+  background: #edf1f7;
+  border-radius: 999px;
+  height: 7px;
+  margin-top: 0.32rem;
+  overflow: hidden;
+}
+
+.cluster-profile-track span,
+.membership-degree-track span {
+  background: var(--color-primary);
+  border-radius: inherit;
+  display: block;
+  height: 100%;
+}
+
 .bar-track {
   background: #edf1f7;
   border-radius: 999px;
@@ -1580,6 +1645,86 @@ td {
   font-size: 0.72rem;
 }
 
+.membership-degree-list {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 0.75rem;
+}
+
+.membership-degree-row {
+  display: grid;
+  gap: 0.2rem 0.65rem;
+  grid-template-columns: minmax(75px, 0.7fr) minmax(0, 2fr) minmax(72px, auto);
+}
+
+.membership-degree-row > span {
+  align-self: center;
+  color: #536583;
+  font-size: 0.58rem;
+}
+
+.membership-degree-row > strong {
+  align-self: center;
+  color: var(--color-primary-dark);
+  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.membership-degree-track {
+  align-self: center;
+  margin: 0;
+}
+
+.membership-explanation,
+.knn-distance-note {
+  color: var(--color-muted);
+  font-size: 0.58rem;
+  line-height: 1.5;
+  margin: 0.7rem 0 0;
+}
+
+.knn-distance-panel {
+  margin-top: 0.75rem;
+}
+
+.knn-distance-panel h2 {
+  color: var(--color-primary-dark);
+  font-size: 0.72rem;
+  margin: 0;
+}
+
+.knn-distance-list {
+  display: grid;
+  gap: 0.4rem;
+  list-style: none;
+  margin: 0.65rem 0 0;
+  padding: 0;
+}
+
+.knn-distance-list li {
+  align-items: center;
+  background: #fafbfd;
+  border: 1px solid #edf0f5;
+  border-radius: 0.45rem;
+  color: #536583;
+  display: flex;
+  font-size: 0.6rem;
+  justify-content: space-between;
+  padding: 0.55rem 0.65rem;
+}
+
+.knn-distance-list strong {
+  color: var(--color-primary-dark);
+  font-variant-numeric: tabular-nums;
+}
+
+.analysis-unavailable .status-message {
+  background: #f7f9fc;
+  border-color: #e6ebf2;
+  color: #5b6b82;
+}
+
 .evaluation-metric-card {
   min-height: 150px;
 }
@@ -1848,6 +1993,7 @@ td {
   }
 
   .dashboard-metrics,
+  .dashboard-cluster-profile-grid,
   .preference-grid,
   .form-section-fields,
   .featured-grid {

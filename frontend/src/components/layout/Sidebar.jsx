@@ -16,7 +16,7 @@ const navigationItems = [
   { path: '/cari-laptop', label: 'Cari Laptop', icon: Sparkles },
   { path: '/hasil-rekomendasi', label: 'Hasil Rekomendasi', icon: Check },
   { path: '/katalog', label: 'Katalog Laptop', icon: Laptop },
-  { path: '/processing', label: 'Processing & Algorithm', icon: Network },
+  { path: '/processing', label: 'Pemrosesan & Algoritma', icon: Network },
   { path: '/evaluasi', label: 'Evaluasi Model', icon: BarChart3 },
   { path: '/tentang', label: 'Tentang Sistem', icon: Info },
 ]

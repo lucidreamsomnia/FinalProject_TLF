@@ -1,7 +1,41 @@
 from typing import Any
 
+import pandas as pd
+
 from backend.app.services.evaluation_service import get_evaluation
 from backend.app.services.model_loader import MEMBERSHIP_COLUMNS, ModelBundle
+from backend.app.services.preprocessing import parse_memory
+
+
+def _cluster_profiles(bundle: ModelBundle) -> list[dict[str, Any]]:
+    source = bundle.original_dataset
+    cluster_labels = bundle.fcm_results["Cluster"].to_numpy(dtype=int)
+    ram = pd.to_numeric(
+        source["Ram"].astype(str).str.extract(r"(\d+(?:\.\d+)?)", expand=False),
+        errors="coerce",
+    )
+    weight = pd.to_numeric(
+        source["Weight"].astype(str).str.extract(r"(\d+(?:\.\d+)?)", expand=False),
+        errors="coerce",
+    )
+    ssd = source["Memory"].map(lambda value: parse_memory(value)["SSD_GB"])
+
+    profiles = []
+    for cluster in range(1, 5):
+        cluster_rows = cluster_labels == cluster
+        profiles.append(
+            {
+                "cluster": cluster,
+                "count": int(cluster_rows.sum()),
+                "average_ram_gb": float(ram[cluster_rows].mean()),
+                "average_price_eur": float(
+                    source.loc[cluster_rows, "Price_euros"].mean()
+                ),
+                "average_weight_kg": float(weight[cluster_rows].mean()),
+                "average_ssd_gb": float(ssd[cluster_rows].mean()),
+            }
+        )
+    return profiles
 
 
 def dashboard_data(bundle: ModelBundle) -> dict[str, Any]:
@@ -34,6 +68,7 @@ def dashboard_data(bundle: ModelBundle) -> dict[str, Any]:
             {"cluster": int(cluster), "count": int(labels.get(cluster, 0))}
             for cluster in range(1, 5)
         ],
+        "cluster_profiles": _cluster_profiles(bundle),
         "evaluation": get_evaluation(bundle)["main"],
         "featured_laptops": featured,
         "recommendation_activity": [],

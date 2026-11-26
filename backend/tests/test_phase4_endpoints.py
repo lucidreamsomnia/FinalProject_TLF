@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 
 from backend.app.main import app
 from backend.app.services.model_loader import MEMBERSHIP_COLUMNS, get_model_bundle
+from backend.app.services.preprocessing import parse_memory
 
 
 class Phase4EndpointTests(unittest.TestCase):
@@ -26,6 +27,47 @@ class Phase4EndpointTests(unittest.TestCase):
         dashboard = self.client.get("/api/dashboard")
         self.assertEqual(dashboard.status_code, 200)
         self.assertEqual(dashboard.json()["summary"]["total_laptops"], 1303)
+        profiles = dashboard.json()["cluster_profiles"]
+        self.assertEqual([profile["cluster"] for profile in profiles], [1, 2, 3, 4])
+        self.assertEqual(sum(profile["count"] for profile in profiles), 1303)
+        self.assertTrue(
+            all(
+                profile[field] > 0
+                for profile in profiles
+                for field in (
+                    "average_ram_gb",
+                    "average_price_eur",
+                    "average_weight_kg",
+                    "average_ssd_gb",
+                )
+            )
+        )
+        bundle = get_model_bundle()
+        for profile in profiles:
+            cluster_rows = bundle.fcm_results["Cluster"] == profile["cluster"]
+            original_rows = bundle.original_dataset.loc[cluster_rows]
+            expected_ram = (
+                original_rows["Ram"].str.extract(r"(\d+(?:\.\d+)?)", expand=False)
+                .astype(float)
+                .mean()
+            )
+            expected_weight = (
+                original_rows["Weight"].str.extract(
+                    r"(\d+(?:\.\d+)?)", expand=False
+                )
+                .astype(float)
+                .mean()
+            )
+            expected_ssd = original_rows["Memory"].map(
+                lambda value: parse_memory(value)["SSD_GB"]
+            ).mean()
+            self.assertAlmostEqual(profile["average_ram_gb"], expected_ram)
+            self.assertAlmostEqual(
+                profile["average_price_eur"],
+                original_rows["Price_euros"].mean(),
+            )
+            self.assertAlmostEqual(profile["average_weight_kg"], expected_weight)
+            self.assertAlmostEqual(profile["average_ssd_gb"], expected_ssd)
 
         catalog = self.client.get("/api/catalog?page=1&page_size=8")
         self.assertEqual(catalog.status_code, 200)

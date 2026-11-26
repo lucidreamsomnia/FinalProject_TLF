@@ -39,6 +39,19 @@ function formatDecimal(value, digits = 4) {
   return Number.isFinite(numericValue) ? numericValue.toFixed(digits) : '—'
 }
 
+function formatProfileValue(value, digits, unit, currency = false) {
+  const numericValue = Number(value)
+  if (!Number.isFinite(numericValue)) return '—'
+  if (currency) {
+    return new Intl.NumberFormat('id-ID', {
+      style: 'currency',
+      currency: 'EUR',
+      maximumFractionDigits: 0,
+    }).format(numericValue)
+  }
+  return `${numericValue.toFixed(digits)} ${unit}`
+}
+
 function formatMetricCount(value, suffix) {
   const formatted = formatCount(value)
   return formatted === '—' ? '—' : `${formatted} ${suffix}`
@@ -94,6 +107,7 @@ function Dashboard() {
       : {}
   const featured = Array.isArray(data.featured_laptops) ? data.featured_laptops : []
   const activity = Array.isArray(data.recommendation_activity) ? data.recommendation_activity : []
+  const clusterProfiles = Array.isArray(data.cluster_profiles) ? data.cluster_profiles : []
   const clusterCounts = clusters
     .map((cluster) => {
       if (cluster?.count == null) return null
@@ -102,6 +116,12 @@ function Dashboard() {
     })
     .filter((count) => Number.isFinite(count))
   const maxClusterCount = Math.max(...clusterCounts, 1)
+  const profileMetrics = [
+    { key: 'average_ram_gb', label: 'Rata-rata RAM', unit: 'GB', digits: 1 },
+    { key: 'average_price_eur', label: 'Rata-rata harga', unit: 'EUR', currency: true },
+    { key: 'average_weight_kg', label: 'Rata-rata berat', unit: 'kg', digits: 2 },
+    { key: 'average_ssd_gb', label: 'Rata-rata SSD', unit: 'GB', digits: 1 },
+  ]
 
   return (
     <main className="page-shell dashboard-page">
@@ -162,17 +182,79 @@ function Dashboard() {
           <div className="panel-heading"><div><h2>Ringkasan Evaluasi FCM</h2><p>Hasil eksperimen konfigurasi c=4 dan m=2.0</p></div></div>
           <div className="evaluation-mini-grid">
             <div><span>FPC</span><strong>{formatDecimal(evaluation?.fpc)}</strong></div>
-            <div><span>Silhouette</span><strong>{formatDecimal(evaluation?.silhouette)}</strong></div>
-            <div><span>Davies-Bouldin</span><strong>{formatDecimal(evaluation?.davies_bouldin)}</strong></div>
+            <div><span>Silhouette Score</span><strong>{formatDecimal(evaluation?.silhouette)}</strong></div>
+            <div><span>Davies-Bouldin Index</span><strong>{formatDecimal(evaluation?.davies_bouldin)}</strong></div>
           </div>
           <Link className="text-link" to="/evaluasi">Buka analisis evaluasi →</Link>
         </div>
       </section>
 
+      <section className="panel dashboard-cluster-profiles" aria-labelledby="cluster-profiles-title">
+        <div className="panel-heading">
+          <div>
+            <h2 id="cluster-profiles-title">Profil Rata-rata Cluster</h2>
+            <p>
+              Rata-rata karakteristik laptop berdasarkan cluster FCM aktual. Panjang batang
+              diskalakan terpisah untuk setiap fitur.
+            </p>
+          </div>
+        </div>
+        {clusterProfiles.length > 0 ? (
+          <div className="dashboard-cluster-profile-grid">
+            {profileMetrics.map((metric) => {
+              const values = clusterProfiles
+                .map((profile) => Number(profile?.[metric.key]))
+                .filter(Number.isFinite)
+              const maximum = Math.max(...values, 1)
+              return (
+                <section className="cluster-profile-metric" key={metric.key}>
+                  <h3>{metric.label} ({metric.unit === 'EUR' ? '€' : metric.unit})</h3>
+                  <div className="cluster-profile-rows" role="list">
+                    {clusterProfiles.map((profile, index) => {
+                      const value = Number(profile?.[metric.key])
+                      const valid = Number.isFinite(value)
+                      const width = valid ? Math.max(0, (value / maximum) * 100) : 0
+                      const cluster = profile?.cluster ?? index + 1
+                      return (
+                        <div className="cluster-profile-row" key={cluster} role="listitem">
+                          <div className="cluster-profile-label">
+                            <span>Cluster {cluster}</span>
+                            <strong>
+                              {metric.currency
+                                ? formatProfileValue(value, 0, metric.unit, true)
+                                : formatProfileValue(value, metric.digits, metric.unit)}
+                            </strong>
+                          </div>
+                          <div
+                            className="cluster-profile-track"
+                            role="progressbar"
+                            aria-label={`${metric.label}, Cluster ${cluster}`}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                            aria-valuenow={width}
+                            aria-valuetext={metric.currency
+                              ? formatProfileValue(value, 0, metric.unit, true)
+                              : formatProfileValue(value, metric.digits, metric.unit)}
+                          >
+                            <span style={{ width: `${width}%` }} />
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </section>
+              )
+            })}
+          </div>
+        ) : (
+          <div className="empty-state">Data profil cluster belum tersedia dari backend.</div>
+        )}
+      </section>
+
       <section className="panel system-flow">
         <div className="panel-heading"><div><h2>Alur Sistem</h2></div></div>
         <div className="flow-items">
-          {['Input', 'Preprocessing', 'FCM', 'Membership Degree', 'KNN', 'Rekomendasi'].map((step, index) => (
+          {['Masukan', 'Prapemrosesan', 'FCM', 'Membership Degree', 'KNN', 'Rekomendasi'].map((step, index) => (
             <div className="flow-item" key={step}><span>{step}</span>{index < 5 ? <b>→</b> : null}</div>
           ))}
         </div>

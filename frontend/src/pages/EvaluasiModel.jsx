@@ -71,7 +71,7 @@ function EvaluasiModel() {
       <p className="eyebrow">Evaluasi Model</p>
       <h1>Evaluasi FCM dan FCM-KNN</h1>
       <p className="page-intro">
-        Ringkasan metrik yang tersedia dari data evaluasi yang disimpan backend.
+        Ringkasan metrik berdasarkan hasil evaluasi yang disediakan backend.
       </p>
 
       <section className="evaluation-metrics-grid" aria-label="Metrik evaluasi utama">
@@ -89,7 +89,7 @@ function EvaluasiModel() {
         />
         <MetricCard
           icon={Network}
-          label="Davies-Bouldin"
+          label="Davies-Bouldin Index"
           value={formatDecimal(main.davies_bouldin, 6)}
           description="Mengukur kesamaan antarcluster; nilai lebih rendah umumnya lebih baik."
         />
@@ -134,33 +134,39 @@ function EvaluasiModel() {
 
       <section className="evaluation-grid">
         <div className="panel">
-          <div className="section-heading"><h2>Sensitivity Analysis</h2></div>
+          <div className="section-heading"><h2>Analisis Sensitivitas</h2></div>
           {sensitivity.available && (clusterSensitivity.length > 0 || fuzzinessSensitivity.length > 0) ? (
             <div className="sensitivity-content">
               {clusterSensitivity.length > 0 ? (
-                <p>{clusterSensitivity.length} hasil sensitivitas jumlah cluster tersedia.</p>
+                <p>Tersedia {clusterSensitivity.length} hasil analisis sensitivitas jumlah cluster.</p>
               ) : null}
               {fuzzinessSensitivity.length > 0 ? (
-                <p>{fuzzinessSensitivity.length} hasil sensitivitas fuzziness tersedia.</p>
+                <p>Tersedia {fuzzinessSensitivity.length} hasil analisis sensitivitas parameter fuzziness.</p>
               ) : null}
             </div>
           ) : (
-            <StatusMessage tone="info" title="Sensitivity analysis belum tersedia">
-              {sensitivity.message ?? 'Data sensitivity analysis belum tersedia.'}
-            </StatusMessage>
+            <div className="analysis-unavailable">
+              <StatusMessage tone="info" title="Analisis sensitivitas belum tersedia">
+                Keluaran notebook tersimpan belum menyediakan hasil sensitivitas numerik yang terverifikasi. Backend tidak menjalankan ulang eksperimen; ketiadaan data bukan hasil negatif.
+              </StatusMessage>
+            </div>
           )}
         </div>
 
         <div className="panel">
           <div className="section-heading"><h2>PCA</h2></div>
           {data.pca?.available ? (
-            <StatusMessage tone="info" title="PCA tersedia">
-              {data.pca.message ?? 'Visualisasi PCA tersedia dari backend.'}
-            </StatusMessage>
+            <div className="analysis-unavailable">
+              <StatusMessage tone="info" title="Data PCA tersedia">
+                Backend menyatakan data PCA tersedia, tetapi visualisasi belum ditampilkan pada halaman ini.
+              </StatusMessage>
+            </div>
           ) : (
-            <StatusMessage tone="info" title="Visualisasi PCA belum tersedia">
-              {data.pca?.message ?? 'PCA belum tersedia pada implementasi backend saat ini.'}
-            </StatusMessage>
+            <div className="analysis-unavailable">
+              <StatusMessage tone="info" title="Visualisasi PCA belum tersedia">
+                Koordinat PCA tidak tersedia dari backend. Ini berarti visualisasinya belum dapat ditampilkan, bukan hasil evaluasi yang negatif.
+              </StatusMessage>
+            </div>
           )}
         </div>
       </section>

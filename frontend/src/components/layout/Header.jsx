@@ -7,7 +7,7 @@ const pageLabels = {
   '/cari-laptop': 'Rekomendasi Laptop',
   '/hasil-rekomendasi': 'Hasil Rekomendasi',
   '/katalog': 'Katalog Laptop',
-  '/processing': 'Processing & Algorithm',
+  '/processing': 'Pemrosesan & Algoritma',
   '/evaluasi': 'Evaluasi Model',
   '/tentang': 'Tentang Sistem',
 }
