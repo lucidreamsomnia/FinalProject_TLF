@@ -1,1 +1,2 @@
-
+# Dependensi Python aplikasi LAPTOPFIND dikelola di backend/requirements.txt.
+-r backend/requirements.txt
