@@ -2,6 +2,8 @@ import { useRef, useState } from 'react'
 import { CheckCircle2, FileText, Upload, Users } from 'lucide-react'
 import StatusMessage from '../components/common/StatusMessage'
 import { getApiError, uploadDataset, validatePreferences } from '../services/apiService'
+import { useNavigate } from 'react-router-dom'
+import { savePreferences } from '../services/preferenceStorage'
 
 const CPU_OPTIONS = ['Intel Core i3', 'Intel Core i5', 'Intel Core i7', 'Intel Core i9', 'Intel Core M', 'Intel Celeron', 'Intel Pentium', 'Intel Atom', 'AMD Other', 'Other']
 const FEATURE_COLUMNS = ['Price_euros', 'Ram_GB', 'Weight_kg', 'SSD_GB', 'HDD_GB', 'CPU_Family_Score', 'CPU_Base_GHz']
@@ -14,6 +16,7 @@ function toPreferencePayload(form) {
 }
 
 function InputData() {
+  const navigate = useNavigate()
   const [form, setForm] = useState(initialForm)
   const [validation, setValidation] = useState(null)
   const [validationError, setValidationError] = useState('')
@@ -36,11 +39,16 @@ function InputData() {
     setValidating(true)
     setValidationError('')
     setValidation(null)
+
     try {
-      setValidation(await validatePreferences(toPreferencePayload(form)))
-    } catch (error) {
+      const payload = toPreferencePayload(form)
+      const result = await validatePreferences(payload)
+
+      setValidation(result)
+      savePreferences(payload)
+     } catch (error) {
       setValidationError(getApiError(error, 'Validasi preferensi gagal.'))
-    } finally {
+     } finally {
       setValidating(false)
     }
   }
@@ -90,7 +98,22 @@ function InputData() {
           </div>
           <button className="button button-primary" disabled={validating} type="submit">{validating ? 'Memvalidasi...' : 'Validasi Preferensi'} <CheckCircle2 size={14} /></button>
           {validationError ? <StatusMessage tone="error" title="Validasi gagal">{validationError}</StatusMessage> : null}
-          {validation ? <StatusMessage tone="success" title="Validasi input berhasil">Budget model: EUR {validation.budget_eur.toFixed(2)}. Data siap digunakan untuk proses rekomendasi.</StatusMessage> : null}
+          {validation ? (
+            <>
+              <StatusMessage tone="success" title="Validasi input berhasil">
+                Budget model: EUR {validation.budget_eur.toFixed(2)}.
+                Data siap digunakan untuk proses rekomendasi.
+              </StatusMessage>
+
+              <button
+                type="button"
+                className="button button-primary"
+                onClick={() => navigate('/cari-laptop')}
+              >
+                Gunakan Preferensi di Cari Laptop
+              </button>
+            </>
+          ) : null}
         </form>
 
         <section className="panel upload-panel">

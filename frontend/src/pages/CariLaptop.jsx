@@ -4,13 +4,27 @@ import { useNavigate } from 'react-router-dom'
 import StatusMessage from '../components/common/StatusMessage'
 import { fetchRecommendations, getApiError } from '../services/apiService'
 import { saveRecommendationResponse } from '../services/recommendationStorage'
+import { readPreferences, savePreferences } from '../services/preferenceStorage'
 
 const CPU_OPTIONS = ['Intel Core i3', 'Intel Core i5', 'Intel Core i7', 'Intel Core i9', 'Intel Core M', 'Intel Celeron', 'Intel Pentium', 'Intel Atom', 'AMD Other', 'Other']
 const initialForm = { budget_idr: '30000000', ram_gb: '16', ssd_gb: '512', hdd_gb: '0', weight_kg: '2', cpu_family: 'Intel Core i7', cpu_base_ghz: '2.4' }
 
 function CariLaptop() {
   const navigate = useNavigate()
-  const [form, setForm] = useState(initialForm)
+
+  const [form, setForm] = useState(() => {
+  const savedPreferences = readPreferences()
+
+  return savedPreferences
+    ? Object.fromEntries(
+        Object.entries(savedPreferences).map(([key, value]) => [
+          key,
+          String(value),
+        ])
+      )
+    : initialForm
+  })
+
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
@@ -31,6 +45,7 @@ function CariLaptop() {
     const payload = Object.fromEntries(Object.entries(form).map(([key, value]) => [key, key === 'cpu_family' ? value : Number(value)]))
     try {
       const result = await fetchRecommendations(payload)
+      savePreferences(payload)
       saveRecommendationResponse(result)
       navigate('/hasil-rekomendasi', { state: { recommendationResponse: result } })
     } catch (requestError) {
